@@ -19,18 +19,39 @@
     .header-section {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 2rem;
     }
     .mapa-mini {
-      width: 220px;
-      height: 180px;
-      background-color: #eaeaea;
-      border-radius: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.5rem;
+    }
+    .mini-column, .mini-row {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-left: auto;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mini-center {
+      display: grid;
+      grid-template-rows: repeat(5, auto);
+      gap: 4px;
+    }
+    .mini-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .mini-box {
+      width: 20px; height: 20px;
+      background-color: #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      line-height: 20px;
+    }
+    .mini-highlight {
+      background-color: yellow !important;
     }
     .btn-group-view {
       display: flex;
@@ -46,12 +67,14 @@
   <div class="detalle-container">
     <div class="header-section mb-4">
       <div>
-        <h2>Box <span>15</span></h2>
+        <h2>Box <span id="numeroBox">15</span></h2>
         <h5>Cardiovascular</h5>
       </div>
-      <div class="mapa-mini">
-        Box 15
-      </div>
+      <div class="mapa-mini" id="miniMapa"></div>
+    </div>
+
+    <div class="mb-3">
+      <a href="dashboard.html" class="btn btn-outline-secondary">Volver al Dashboard</a>
     </div>
 
     <div class="btn-group-view">
@@ -107,6 +130,57 @@
   </div>
 
   <script>
+    function obtenerParametro(nombre) {
+      const params = new URLSearchParams(window.location.search);
+      return parseInt(params.get(nombre)) || 1;
+    }
+
+    const boxSeleccionado = obtenerParametro('box');
+    document.getElementById('numeroBox').innerText = boxSeleccionado;
+
+    const miniMapa = document.getElementById('miniMapa');
+
+    const columnaIzquierda = document.createElement('div');
+    columnaIzquierda.classList.add('mini-column');
+    for (let i = 1; i <= 5; i++) {
+      const div = document.createElement('div');
+      div.className = 'mini-box';
+      div.innerText = i;
+      if (i === boxSeleccionado) div.classList.add('mini-highlight');
+      columnaIzquierda.appendChild(div);
+    }
+
+    const centro = document.createElement('div');
+    centro.classList.add('mini-center');
+    for (let f = 0; f < 5; f++) {
+      const fila = document.createElement('div');
+      fila.classList.add('mini-row');
+      for (let j = 0; j < 12; j++) {
+        let numero = 6 + f * 12 + j;
+        if (numero > 63) break;
+        const div = document.createElement('div');
+        div.className = 'mini-box';
+        div.innerText = numero;
+        if (numero === boxSeleccionado) div.classList.add('mini-highlight');
+        fila.appendChild(div);
+      }
+      centro.appendChild(fila);
+    }
+
+    const columnaDerecha = document.createElement('div');
+    columnaDerecha.classList.add('mini-column');
+    for (let i = 64; i <= 68; i++) {
+      const div = document.createElement('div');
+      div.className = 'mini-box';
+      div.innerText = i;
+      if (i === boxSeleccionado) div.classList.add('mini-highlight');
+      columnaDerecha.appendChild(div);
+    }
+
+    miniMapa.appendChild(columnaIzquierda);
+    miniMapa.appendChild(centro);
+    miniMapa.appendChild(columnaDerecha);
+
     function mostrarVista(id) {
       document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
       document.getElementById('vista-' + id).classList.add('active');
