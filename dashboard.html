@@ -40,12 +40,13 @@
       font-weight: bold;
       color: #a100a1;
     }
+
     .hospital-logo img {
-      width: 36px;
-      height: 36px;
+      width: 200px;
+      height: auto;
     }
     .user-info {
-      font-size: 14px;
+      font-size: 25px;
       color: #333;
     }
     .mapa-estructura {
@@ -70,6 +71,13 @@
       justify-content: center;
       gap: 0.5rem;
     }
+
+    .pasillo-titulo {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    
     .glosario {
       position: absolute;
       top: 15px;
@@ -90,11 +98,23 @@
   </style>
 </head>
 <body>
+  <div style="text-align: right; padding: 10px; font-weight: bold;" id="clock"></div>
+<script>
+  function updateClock() {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const seconds = now.getSeconds().toString().padStart(2, '0');
+  const timeString = `${hours}:${minutes}:${seconds}`;
+  document.getElementById("clock").textContent = "Hora actual: " + timeString;
+}
+  setInterval(updateClock, 1000);
+  updateClock();
+</script>
   <div class="container py-4">
     <div class="header-bar">
       <div class="hospital-logo">
-        <img src="logo.png" alt="Logo">
-        Hospital Padre Hurtado
+        <img src="https://cetram.org/hph/wp-content/uploads/2013/11/Logo_HospitalPadreHurtado21.png" alt="Logo">
       </div>
       <div class="user-info">Dr. Juan Pérez</div>
     </div>
@@ -110,16 +130,18 @@
 
       <div class="mapa-estructura">
         <div class="vertical-column">
+          <div class="pasillo-titulo">Pasillo 1</div>
           <script>for(let i=1; i<=5; i++)document.write(`<div class="box ocupado" onclick="mostrarDetalle(${i}, 'ocupado')">${i}</div>`);</script>
         </div>
         <div class="horizontal-area">
-          <div class="pasillo"><script>for(let i=6; i<=17; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div>
-          <div class="pasillo"><script>for(let i=18; i<=29; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div>
-          <div class="pasillo"><script>for(let i=30; i<=41; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div>
-          <div class="pasillo"><script>for(let i=42; i<=53; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div>
-          <div class="pasillo"><script>for(let i=54; i<=63; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div>
+          <div><div class="pasillo-titulo">Pasillo 2</div><div class="pasillo"><script>for(let i=6; i<=17; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div></div>
+          <div><div class="pasillo-titulo">Pasillo 3</div><div class="pasillo"><script>for(let i=18; i<=29; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div></div>
+          <div><div class="pasillo-titulo">Pasillo 4</div><div class="pasillo"><script>for(let i=30; i<=41; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div></div>
+          <div><div class="pasillo-titulo">Pasillo 5</div><div class="pasillo"><script>for(let i=42; i<=53; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div></div>
+          <div><div class="pasillo-titulo">Pasillo 6</div><div class="pasillo"><script>for(let i=54; i<=63; i++)document.write(`<div class="box ${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}" onclick="mostrarDetalle(${i}, '${i%3===0?'mantenimiento':i%2===0?'desocupado':'ocupado'}')">${i}</div>`);</script></div></div>
         </div>
         <div class="vertical-column">
+          <div class="pasillo-titulo">Pasillo 7</div>
           <script>for(let i=64; i<=68; i++)document.write(`<div class="box ocupado" onclick="mostrarDetalle(${i}, 'ocupado')">${i}</div>`);</script>
         </div>
       </div>
@@ -130,8 +152,22 @@
   <script>
     function mostrarDetalle(boxId, estado) {
       let contenido = `<p><strong>Box:</strong> ${boxId}</p><p><strong>Estado:</strong> ${estado.charAt(0).toUpperCase() + estado.slice(1)}</p>`;
+      
+      
       if (estado === 'ocupado') {
         contenido += `
+          <p><strong>Porcentaje de Ocupación AM:</strong> 90%</p>
+          <p><strong>Porcentaje de Ocupación PM:</strong> 80%</p>
+        `;
+      } else if (estado === 'desocupado') {
+        contenido += `
+          <p><strong>Porcentaje de Ocupación AM:</strong> 40%</p>
+          <p><strong>Porcentaje de Ocupación PM:</strong> 20%</p>
+        `;
+      }
+
+      if (estado === 'ocupado') {
+        contenido += ` 
           <p><strong>Doctor:</strong> Dr. Juan Pérez</p>
           <p><strong>Paciente:</strong> Paciente 13</p>
           <p><strong>Hora inicio:</strong> 14:20</p>
@@ -144,24 +180,25 @@
           <p><strong>Duración:</strong> 30 minutos</p>
         `;
       } else if (estado === 'mantenimiento') {
-        contenido += `
+        contenido += ` 
           <p><strong>Hora inicio:</strong> 14:00</p>
           <p><strong>Hora término:</strong> 16:20</p>
           <p><strong>Motivo:</strong> Rutinario</p>
         `;
       }
+
       contenido += `
         <div class="mt-3">
           <a href="historialBox.html?box=${boxId}" class="btn btn-outline-primary">Historial</a>
           <a href="detalleBox.html?box=${boxId}" class="btn btn-primary ms-2">Detalle</a>
         </div>
       `;
+      
       document.getElementById('modalContent').innerHTML = contenido;
       const modal = new bootstrap.Modal(document.getElementById('modalDetalle'));
       modal.show();
     }
   </script>
-
   <div class="modal fade" id="modalDetalle" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
