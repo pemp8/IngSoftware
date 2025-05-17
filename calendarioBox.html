@@ -1,0 +1,370 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agenda del Box {{ box_id }}</title>
+    <!-- Bootstrap y FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+  <style>
+    body { background-color: #f5f9f9; padding: 2rem; }
+    .calendar-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 1000px;
+      margin: auto;
+    }
+    h2 { color: #7b2cbf; margin-bottom: 1rem; }
+    .action-buttons { margin-top: 1rem; text-align: right; }
+  </style>
+</head>
+<body>
+    <!-- Contenedor principal -->
+  <div class="calendar-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2>Agenda del Box {{ box_id }}</h2>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Volver al dashboard</a>
+    </div>
+        <!-- Calendario -->
+    <div id="calendar"></div>
+        <!-- Botones para abrir modales -->
+    <div class="action-buttons">
+      <button id="btnOpenAddConsulta" class="btn btn-success">Agregar consulta</button>
+      <button id="btnOpenDelConsulta" class="btn btn-danger">Eliminar consulta</button>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar consulta -->
+  <div class="modal fade" id="modalAddConsulta" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="formAddConsulta" class="modal-content">
+        <div class="modal-header">
+          <h5>Agregar consulta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="add-box-id" value="{{ box_id }}">
+          <input type="hidden" id="add-esp-m"    value="{{ default_esp_m }}">
+          <input type="hidden" id="add-esp-name" value="{{ default_esp_name }}">
+          <input type="hidden" id="add-ficha"    value="0">
+
+          <div class="mb-3">
+            <label for="add-consulta-dia" class="form-label">Día</label>
+            <select id="add-consulta-dia" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label for="add-consulta-hora" class="form-label">Hora</label>
+            <select id="add-consulta-hora" class="form-select" required disabled></select>
+          </div>
+          <div class="mb-3">
+            <label for="add-consulta-prof" class="form-label">Profesional</label>
+            <select id="add-consulta-prof" class="form-select" required disabled></select>
+          </div>
+          <div class="mb-3">
+            <label for="add-consulta-pac" class="form-label">Paciente</label>
+            <select id="add-consulta-pac" class="form-select" required disabled></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="add-consulta-save" class="btn btn-primary" disabled>Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Eliminar consulta -->
+  <div class="modal fade" id="modalDelConsulta" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="formDelConsulta" class="modal-content">
+        <div class="modal-header">
+          <h5>Eliminar consulta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="del-consulta-dia" class="form-label">Día</label>
+            <select id="del-consulta-dia" class="form-select" required></select>
+          </div>
+          <div class="mb-3">
+            <label for="del-consulta-item" class="form-label">Consulta</label>
+            <select id="del-consulta-item" class="form-select" required disabled></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="del-consulta-save" class="btn btn-danger" disabled>Eliminar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Editar consulta -->
+  <div class="modal fade" id="modalEditConsulta" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="formEditConsulta" class="modal-content">
+        <div class="modal-header">
+          <h5>Editar estado de consulta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-consulta-id" value="">
+          <p><strong>Profesional:</strong> <span id="edit-consulta-prof"></span></p>
+          <p><strong>Paciente:</strong>    <span id="edit-consulta-pac"></span></p>
+          <div class="mb-3">
+            <label for="consulta-observa" class="form-label">Observaciones</label>
+            <textarea id="consulta-observa" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="consulta-vino">
+            <label class="form-check-label" for="consulta-vino">Vino</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="consulta-atendio">
+            <label class="form-check-label" for="consulta-atendio">Atendió</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="consulta-save" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Inicializa FullCalendar con configuración local
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'timeGridWeek',
+      locale: 'es',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'timeGridDay,timeGridWeek,dayGridMonth'
+      },
+      events: {{ events_json|safe }}
+    });
+    calendar.render();
+
+    // — polling cada 5s con limpieza de zona horaria —
+    async function actualizarEventos() {
+      try {
+        const res = await fetch("{% url 'calendar_events' box_id %}");
+        if (!res.ok) throw new Error(res.statusText);
+        const { events } = await res.json();
+
+        // eliminar cualquier sufijo Z o +00:00, -04:00, etc.
+        // (se pasana como utc y se transformaba dnvo a hora local, asi que es necesario limpiar el utc)
+        events.forEach(ev => {
+          if (typeof ev.start === 'string') {
+            ev.start = ev.start.replace(/(Z|[+\-]\d{2}:\d{2})$/, '');
+          }
+          if (typeof ev.end === 'string' && ev.end) {
+            ev.end = ev.end.replace(/(Z|[+\-]\d{2}:\d{2})$/, '');
+          }
+        });
+
+        calendar.removeAllEvents();
+        calendar.addEventSource(events);
+
+      } catch (err) {
+        console.error("Error al refrescar eventos:", err);
+      }
+    }
+
+    // Primera llamada y luego periódico
+    actualizarEventos();
+    setInterval(actualizarEventos, 5000);
+
+
+    // ——————————————
+    // EDITAR CONSULTA: 
+    // ——————————————
+    calendar.on('eventClick', info => {
+      if (!info.event.title.toLowerCase().includes('mantenimiento')) {
+        document.getElementById('edit-consulta-id').value        = info.event.id;
+        document.getElementById('edit-consulta-prof').textContent = info.event.extendedProps.profesional || '—';
+        document.getElementById('edit-consulta-pac') .textContent = info.event.extendedProps.paciente    || '—';
+        document.getElementById('consulta-observa').value        = info.event.extendedProps.observa     || '';
+        document.getElementById('consulta-vino').checked         = !!info.event.extendedProps.vino;
+        document.getElementById('consulta-atendio').checked      = !!info.event.extendedProps.atendio;
+        new bootstrap.Modal(document.getElementById('modalEditConsulta')).show();
+      }
+    });
+      // Guardar cambios desde modal de edición
+    document.getElementById('consulta-save').onclick = async () => {
+      const id = document.getElementById('edit-consulta-id').value;
+      const data = {
+        vino: document.getElementById('consulta-vino').checked,
+        atendio: document.getElementById('consulta-atendio').checked,
+        observa: document.getElementById('consulta-observa').value
+      };
+      const resp = await fetch(`/api/consulta/${id}/update/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+      });
+      if (resp.ok) location.reload();
+      else alert('Error al actualizar consulta');
+    };
+
+
+    // ——————————————
+    // AGREGAR CONSULTA
+    // ——————————————
+
+          // Lógica de selección dinámica de día, hora, profesional y paciente
+    const selAddDia    = document.getElementById('add-consulta-dia'),
+          selAddHora   = document.getElementById('add-consulta-hora'),
+          selAddProf   = document.getElementById('add-consulta-prof'),
+          selAddPac    = document.getElementById('add-consulta-pac'),
+          btnAddSave   = document.getElementById('add-consulta-save');
+
+    function resetAdd() {
+      selAddDia.innerHTML = '';
+      selAddHora.innerHTML = '';
+      selAddProf.innerHTML = '';
+      selAddPac.innerHTML  = '';
+      selAddHora.disabled = selAddProf.disabled = selAddPac.disabled = btnAddSave.disabled = true;
+    }
+
+    async function populateAdd() {
+      resetAdd();
+      const view = calendar.view.type;
+      let start, end;
+      if (view === 'dayGridMonth') {
+        const d = calendar.getDate();
+        start = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0,10);
+        end   = new Date(d.getFullYear(), d.getMonth()+1, 0).toISOString().slice(0,10);
+      } else {
+        start = calendar.view.activeStart.toISOString().slice(0,10);
+        end   = calendar.view.activeEnd  .toISOString().slice(0,10);
+      }
+      const resp = await fetch(`/api/dias_disponibles/?esp={{ default_esp_m }}&start=${start}&end=${end}`);
+      const js   = await resp.json();
+      if (js.dias.length) {
+        selAddDia.innerHTML = '<option disabled selected>Selecciona día</option>'
+          + js.dias.map(d => `<option data-horas='${JSON.stringify(d.disponibles)}' value="${d.fecha}">${d.fecha}</option>`).join('');
+      } else {
+        selAddDia.innerHTML = '<option disabled>No hay días</option>';
+      }
+    }
+
+    selAddDia.onchange = () => {
+      const opt = selAddDia.selectedOptions[0];
+      const horas = JSON.parse(opt.dataset.horas);
+      selAddHora.innerHTML = horas.map(h => `<option value="${h}">${h}</option>`).join('');
+      selAddHora.disabled = false;
+      selAddProf.disabled = selAddPac.disabled = btnAddSave.disabled = true;
+    };
+
+    selAddHora.onchange = async () => {
+      const fecha = selAddDia.value, hora = selAddHora.value;
+      const r = await fetch(`/api/disponibles/?fecha=${fecha}&hora=${hora}&esp={{ default_esp_m }}`);
+      const d = await r.json();
+      selAddProf.innerHTML = d.profesionales.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+      selAddPac.innerHTML  = d.pacientes   .map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('');
+      selAddProf.disabled = !d.profesionales.length;
+      selAddPac.disabled  = !d.pacientes.length;
+      btnAddSave.disabled = !(d.profesionales.length && d.pacientes.length);
+    };
+
+    btnAddSave.onclick = async () => {
+      const payload = {
+        box_id: {{ box_id }},
+        fecha: selAddDia.value,
+        hora: selAddHora.value,
+        idPaciente: selAddPac.value,
+        prof_id: selAddProf.value,
+        esp_m: {{ default_esp_m }},
+        ficha: 0
+      };
+      const r = await fetch('/agendamiento/add/', {
+        method: 'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'X-CSRFToken':'{{ csrf_token }}'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (r.ok) location.reload();
+      else alert('Error al agregar');
+    };
+
+    document.getElementById('btnOpenAddConsulta').onclick = () => {
+      populateAdd();
+      new bootstrap.Modal(document.getElementById('modalAddConsulta')).show();
+    };
+
+    // ——————————————
+    // ELIMINAR CONSULTA
+    // ——————————————
+
+
+          // Lógica para filtrar días con consultas existentes y eliminarlas
+    const selDelCdia  = document.getElementById('del-consulta-dia'),
+          selDelCitm  = document.getElementById('del-consulta-item'),
+          btnDelC     = document.getElementById('del-consulta-save');
+
+    function populateDel() {
+      selDelCdia.innerHTML = '<option disabled selected>Selecciona día</option>';
+      selDelCitm.innerHTML = '<option disabled selected>Selecciona consulta</option>';
+      selDelCitm.disabled = btnDelC.disabled = true;
+      const dias = {};
+      calendar.getEvents()
+        .filter(ev => !ev.title.toLowerCase().includes('mantenimiento'))
+        .forEach(ev => {
+          const d = ev.start.toISOString().slice(0,10);
+          (dias[d]||(dias[d]=[])).push(ev);
+        });
+      Object.keys(dias).forEach(d => {
+        selDelCdia.innerHTML += `<option value="${d}">${d}</option>`;
+      });
+    }
+
+    selDelCdia.onchange = () => {
+      const list = calendar.getEvents()
+        .filter(ev =>
+          !ev.title.toLowerCase().includes('mantenimiento') &&
+          ev.start.toISOString().slice(0,10) === selDelCdia.value
+        );
+      selDelCitm.innerHTML = '<option disabled selected>Selecciona consulta</option>';
+      list.forEach(ev => {
+        selDelCitm.innerHTML += `<option value="${ev.id}">${ev.extendedProps.hora} (ID:${ev.id})</option>`;
+      });
+      selDelCitm.disabled = !list.length;
+      btnDelC.disabled    = true;
+    };
+
+    selDelCitm.onchange = () => btnDelC.disabled = false;
+
+    btnDelC.onclick = async () => {
+      const r = await fetch(`/agendamiento/${selDelCitm.value}/delete/`, {
+        method:'DELETE',
+        headers:{'X-CSRFToken':'{{ csrf_token }}'}
+      });
+      if (r.ok) location.reload();
+      else alert('Error al eliminar');
+    };
+
+    document.getElementById('btnOpenDelConsulta').onclick = () => {
+      populateDel();
+      new bootstrap.Modal(document.getElementById('modalDelConsulta')).show();
+    };
+
+  });
+  </script>
+</body>
+</html>
